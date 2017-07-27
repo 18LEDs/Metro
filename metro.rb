@@ -5,12 +5,6 @@ require 'uri'
 require 'json'
 require 'pry'
 
-#### nice to haves
-# get valid directions for a route - http://svc.metrotransit.org/NexTrip/Directions/{ROUTE}
-#       error on non-valid direction being provided
-
-
-
 input_route = ARGV[0]
 input_stop = ARGV[1]
 input_direction = ARGV[2]
@@ -93,14 +87,15 @@ end
 ## nextBus flow ##
 ##################
 
-def user_assistance
+def user_assistance(direction_hash)
     puts 'Welcome to GRE NVR-B-L8!'
     print 'Please enter Bus Route: '
-    input_route = gets.chomp
+    input_route = gets.chomp.gsub(/"/, "")
+    require 'pry'; binding.pry
     print 'Please enter Bus Stop: '
-    input_stop = gets.chomp
+    input_stop = gets.chomp.gsub(/"/, "")
     print 'Please enter your direction: '
-    input_direction = gets.chomp
+    input_direction = gets.chomp.gsub(/"/, "")
     nextBus(input_route, input_stop, input_direction, direction_hash)
 end
 
@@ -122,7 +117,7 @@ end
 #############################################
 
 if ARGV[0].nil? || ARGV[1].nil? || ARGV[2].nil?
-    user_assistance
+    user_assistance(direction_hash)
 else
     nextBus(input_route, input_stop, input_direction, direction_hash)
 end
