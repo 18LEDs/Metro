@@ -13,7 +13,6 @@ input_direction = ARGV[2]
 # input_stop = "7th St  and Olson Memorial Hwy"
 # input_direction = "south"
 
-
 direction_hash = [{"Direction" => "south", "Id" => "1"},
                   {"Direction" => "east", "Id" => "2"},
                   {"Direction" => "west", "Id" => "3"},
@@ -91,11 +90,14 @@ def user_assistance(direction_hash)
     puts 'Welcome to GRE NVR-B-L8!'
     print 'Please enter Bus Route: '
     input_route = gets.chomp.gsub(/"/, "")
-    require 'pry'; binding.pry
     print 'Please enter Bus Stop: '
     input_stop = gets.chomp.gsub(/"/, "")
     print 'Please enter your direction: '
     input_direction = gets.chomp.gsub(/"/, "")
+    if input_route.empty? || input_stop.empty? || input_direction.empty?
+        puts 'Empty input detected.  Please try again'
+        exit
+    end
     nextBus(input_route, input_stop, input_direction, direction_hash)
 end
 
@@ -121,3 +123,6 @@ if ARGV[0].nil? || ARGV[1].nil? || ARGV[2].nil?
 else
     nextBus(input_route, input_stop, input_direction, direction_hash)
 end
+
+
+## handle no time returned
