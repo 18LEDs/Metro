@@ -1,4 +1,4 @@
-#Metro
+# Metro
 ----------
 ### An API integration with metrotransit.org to display the next vehicle arrival given a transit route, transit stop, and desired direction.
 

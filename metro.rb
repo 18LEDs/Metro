@@ -43,20 +43,20 @@ def getNextTimeDeparture(route_id, direction_id, stop_id)
     time_URI = URI(time_endpoint)
     req = Net::HTTP.get(time_URI)
     @departure_list = JSON.parse(req)
-    if @departure_list[0]['DepartureText'] == 'Due'
-        puts @departure_list[0]['DepartureText'] + ' now!  Better hurry!'
-    elsif @departure_list[0]['DepartureText'].nil? || @departure_list[0]['DepartureText'].empty?
+    if @departure_list[0]["DepartureText"] == "Due"
+        puts @departure_list[0]["DepartureText"] + " now!  Better hurry!"
+    elsif @departure_list[0]["DepartureText"].nil? || @departure_list[0]["DepartureText"].empty?
         puts 'Last bus has already left for the day'
     else
-        puts @departure_list[0]['DepartureText'] + 'utes until next departure!'
+        puts @departure_list[0]["DepartureText"] + "utes until next departure!"
     end
 end
 
 ### ID scrape functions
 
 def scrapeRouteId(input_route)
-    if r = @route_list.find { |r| r['Description'] == input_route }
-        @route_id = r['Route']
+    if r = @route_list.find { |r| r["Description"] == input_route }
+        @route_id = r["Route"]
     else
         puts 'Route ID not found for entered route.'
         exit
@@ -64,8 +64,8 @@ def scrapeRouteId(input_route)
 end
 
 def scrapeStopId(input_stop)
-    if s = @stops_list.find { |s| s['Text'] == input_stop }
-        @stop_id = s['Value']
+    if s = @stops_list.find { |s| s["Text"] == input_stop }
+        @stop_id = s["Value"]
     else
         puts 'Stop not found'
         exit
@@ -74,9 +74,9 @@ end
 
 def scrapeDirectionId(input_direction, direction_hash)
     input_direction = input_direction.downcase
-    if d = direction_hash.find { |d| d['Direction'] == input_direction }
-        @direction_id = d['Id']
-        if @directions_list.find { |d| d['Value'] == @direction_id }
+    if d = direction_hash.find { |d| d["Direction"] == input_direction }
+        @direction_id = d["Id"]
+        if @directions_list.find { |d| d["Value"] == @direction_id }
         else
             puts 'Direction is not valid for this route.'
             exit
