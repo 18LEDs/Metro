@@ -1,0 +1,68 @@
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "SOuTh"
+11 Minutes until next departure!
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "NORTH"
+2 Minutes until next departure!
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "south"
+Due now!  Better hurry!
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "east"
+Direction is not valid for this route.
+
+agent77:~/workspace (master) $ ruby metro.rb "JUNKDATA" "Cedar-Riverside Station" "east"
+Route ID not found for entered route.
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "JUNKDATA" "south"
+Stop not found
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "JUNKDATA"
+Direction not found
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line"
+Welcome to GRE NVR-B-L8!
+Please enter Transit Route:
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station"
+Welcome to GRE NVR-B-L8!
+Please enter Transit Route:
+
+agent77:~/workspace (master) $ ruby metro.rb
+Welcome to GRE NVR-B-L8!
+Please enter Transit Route: "5 - Brklyn Center - Fremont - 26th Av - Chicago - MOA"
+Please enter Transit Stop: "7th St  and Olson Memorial Hwy"
+Please enter your desired direction: "south"
+11 Minutes until next departure!
+
+Would you like to check another? [Y]es or [N]o?: y
+Please enter Transit Route: "METRO Blue Line"
+Please enter Transit Stop: "Cedar-Riverside Station"  
+Please enter your desired direction: south
+11 Minutes until next departure!
+
+Would you like to check another? [Y]es or [N]o?: n
+Thanks!  Exiting...
+
+agent77:~/workspace (master) $ ruby metro.rb "METRO Blue Line" "Cedar-Riverside Station" "south"
+
+From: /home/ubuntu/workspace/metro.rb @ line 78 Object#getNextTimeDeparture:
+
+    73: def getNextTimeDeparture(route_id, direction_id, stop_id)
+    74:     time_endpoint = "http://svc.metrotransit.org/NexTrip/#{route_id}/#{direction_id}/#{stop_id}?format=json"
+    75:     time_URI = URI(time_endpoint)
+    76:     req = Net::HTTP.get(time_URI)
+    77:     @departure_list = JSON.parse(req)
+ => 78:     require 'pry'; binding.pry
+    79:     if @departure_list[0]["DepartureText"] == "Due"
+    80:         puts @departure_list[0]["DepartureText"] + " now!  Better hurry!"
+    81:     elsif @departure_list[0]["DepartureText"].nil? || @departure_list[0]["DepartureText"].empty?
+    82:         puts 'Last bus has already left for the day'
+    83:     else
+    84:         puts @departure_list[0]["DepartureText"] + "utes until next departure!"
+    85:     end
+    86: end
+
+[1] pry(main)> @departure_list[0]["DepartureText"] = nil
+=> nil
+[2] pry(main)> exit
+Last bus has already left for the day

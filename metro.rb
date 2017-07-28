@@ -1,38 +1,21 @@
-#!/usr/bin/env ruby
-
 require 'net/http'
 require 'uri'
 require 'json'
-require 'pry'
+
+### Gather CLI arguments
 
 input_route = ARGV[0]
 input_stop = ARGV[1]
 input_direction = ARGV[2]
 
-# input_route = "5 - Brklyn Center - Fremont - 26th Av - Chicago - MOA"
-# input_stop = "7th St  and Olson Memorial Hwy"
-# input_direction = "south"
+### Define direction hash from provided docs
 
-direction_hash = [{"Direction" => "south", "Id" => "1"},
-                  {"Direction" => "east", "Id" => "2"},
-                  {"Direction" => "west", "Id" => "3"},
-                  {"Direction" => "north", "Id" => "4"}]
+direction_hash = [{ 'Direction' => 'south', 'Id' => '1' },
+                  { 'Direction' => 'east', 'Id' => '2' },
+                  { 'Direction' => 'west', 'Id' => '3' },
+                  { 'Direction' => 'north', 'Id' => '4' }]
 
-
-def scrapeDirectionId(input_direction, direction_hash)
-    input_direction = input_direction.downcase
-    if d = direction_hash.find { |d| d["Direction"] == input_direction }
-        @direction_id = d["Id"]
-        if @directions_list.find { |d| d["Value"] == @direction_id }
-        else
-            puts 'Direction is not valid for this route.'
-            exit
-        end
-    else
-        puts 'Direction not found'
-        exit
-    end
-end
+### GET functions
 
 def getRoutes
     routes_endpoint = 'http://svc.metrotransit.org/NexTrip/Routes?format=json'
@@ -41,29 +24,11 @@ def getRoutes
     @route_list = JSON.parse(req)
 end
 
-def scrapeRouteId(input_route)
-    if r = @route_list.find { |r| r["Description"] == input_route }
-        @route_id = r["Route"]
-    else
-        puts 'Route ID not found for entered route.'
-        exit
-    end
-end
-
 def getStops(route_id, direction_id)
     stops_endpoint = "http://svc.metrotransit.org/NexTrip/Stops/#{route_id}/#{direction_id}?format=json"
     stops_URI = URI(stops_endpoint)
     req = Net::HTTP.get(stops_URI)
     @stops_list = JSON.parse(req)
-end
-
-def scrapeStopId(input_stop)
-    if s = @stops_list.find { |s| s["Text"] == input_stop }
-        @stop_id = s["Value"]
-    else
-        puts 'Stop not found'
-        exit
-    end   
 end
 
 def getDirections(route_id)
@@ -78,28 +43,79 @@ def getNextTimeDeparture(route_id, direction_id, stop_id)
     time_URI = URI(time_endpoint)
     req = Net::HTTP.get(time_URI)
     @departure_list = JSON.parse(req)
-    puts @departure_list[0]["DepartureText"] + "utes until next departure!"
+    if @departure_list[0]['DepartureText'] == 'Due'
+        puts @departure_list[0]['DepartureText'] + ' now!  Better hurry!'
+    elsif @departure_list[0]['DepartureText'].nil? || @departure_list[0]['DepartureText'].empty?
+        puts 'Last bus has already left for the day'
+    else
+        puts @departure_list[0]['DepartureText'] + 'utes until next departure!'
+    end
 end
 
+### ID scrape functions
 
-##################
-## nextBus flow ##
-##################
+def scrapeRouteId(input_route)
+    if r = @route_list.find { |r| r['Description'] == input_route }
+        @route_id = r['Route']
+    else
+        puts 'Route ID not found for entered route.'
+        exit
+    end
+end
+
+def scrapeStopId(input_stop)
+    if s = @stops_list.find { |s| s['Text'] == input_stop }
+        @stop_id = s['Value']
+    else
+        puts 'Stop not found'
+        exit
+    end   
+end
+
+def scrapeDirectionId(input_direction, direction_hash)
+    input_direction = input_direction.downcase
+    if d = direction_hash.find { |d| d['Direction'] == input_direction }
+        @direction_id = d['Id']
+        if @directions_list.find { |d| d['Value'] == @direction_id }
+        else
+            puts 'Direction is not valid for this route.'
+            exit
+        end
+    else
+        puts 'Direction not found'
+        exit
+    end
+end
+
+### User Guided experience flow
 
 def user_assistance(direction_hash)
-    puts 'Welcome to GRE NVR-B-L8!'
-    print 'Please enter Bus Route: '
+    print 'Please enter Transit Route: '
     input_route = gets.chomp.gsub(/"/, "")
-    print 'Please enter Bus Stop: '
+    print 'Please enter Transit Stop: '
     input_stop = gets.chomp.gsub(/"/, "")
-    print 'Please enter your direction: '
+    print 'Please enter your desired direction: '
     input_direction = gets.chomp.gsub(/"/, "")
     if input_route.empty? || input_stop.empty? || input_direction.empty?
         puts 'Empty input detected.  Please try again'
-        exit
+        user_assistance(direction_hash)
     end
     nextBus(input_route, input_stop, input_direction, direction_hash)
+    puts ''
+    print 'Would you like to check another? [Y]es or [N]o?: '
+    entry = gets.chomp
+    case entry
+    when 'Y', 'y'
+        user_assistance(direction_hash)
+    when 'N', 'n'
+        puts 'Thanks!  Exiting...'
+        exit
+    else
+        puts 'Invalid entry!  Exiting...'
+    end
 end
+
+### nextBus flow
 
 def nextBus(input_route, input_stop, input_direction, direction_hash)
     if @route_list.nil?
@@ -113,16 +129,14 @@ def nextBus(input_route, input_stop, input_direction, direction_hash)
     getNextTimeDeparture(@route_id, @direction_id, @stop_id)
 end
 
-
 #############################################
-##  Startup check for cmd passed arguments ##
+##  Startup check for CLI passed arguments ##
 #############################################
 
 if ARGV[0].nil? || ARGV[1].nil? || ARGV[2].nil?
+    ARGV.clear
+    puts 'Welcome to GRE NVR-B-L8!'
     user_assistance(direction_hash)
 else
     nextBus(input_route, input_stop, input_direction, direction_hash)
 end
-
-
-## handle no time returned
